@@ -47,13 +47,20 @@ def send_mail(mail, reset_url):
         Hi,
         Your LDAP password reset link is:
         {reset_url}
-        This url will be valid for next 24 hours. In case of any issues, \
-        please, get in touch with someone from LDAP administration.
+        This url will be valid for next 24 hours.
         '''.format(reset_url=reset_url))
     msg['Subject'] = 'LDAP password reset link'
     msg['To'] = mail
-    msg['From'] = 'noreply@nodomain.com'
-    s = smtplib.SMTP(conf.get('app', 'smtp_addr'))
+    msg['From'] = conf.get('smtp', 'smtp_from')
+    s = smtplib.SMTP(conf.get('smtp', 'smtp_addr'), conf.get('smtp', 'smtp_port'))
+    user = conf.get('smtp', 'smtp_user')
+    password = conf.get('smtp', 'smtp_password')
+    if user and password:
+        if conf.getboolean('smtp', 'smtp_starttls'):
+            s.ehlo()  # for tls add this line
+            s.starttls()  # for tls add this line
+            s.ehlo()  # for tls add this line
+        s.login(user, password)
     s.sendmail(msg['From'], msg['To'], msg.as_string())
     s.quit()
 
@@ -73,8 +80,9 @@ def index():
                 ldap.set_option(
                     ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
                 l = ldap.initialize(
-                    ldap_uri, trace_level=conf.get('app', 'ldap_debug'))
-                l.start_tls_s()
+                    ldap_uri, trace_level=conf.getint('app', 'ldap_debug'))
+                if conf.getboolean('ldap', 'starttls'):
+                    l.start_tls_s()
             except ldap.LDAPError as error:
                 return render_template('index.html', error=error, form=form)
             try:
@@ -177,8 +185,9 @@ def reset(link_id):
                     ldap.set_option(
                         ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
                     l = ldap.initialize(
-                        ldap_uri, trace_level=conf.get('app', 'ldap_debug'))
-                    l.start_tls_s()
+                        ldap_uri, trace_level=conf.getint('app', 'ldap_debug'))
+                    if conf.getboolean('ldap', 'starttls'):
+                        l.start_tls_s()
                 except ldap.LDAPError as error:
                     return render_template('error.html', error=error)
                 try:
@@ -191,9 +200,11 @@ def reset(link_id):
                     result_type, result_data = l.result(ldap_result_id, 0)
                     l.simple_bind_s(
                         conf.get('ldap', 'user'), conf.get('ldap', 'pass'))
+                    rdn = conf.get('ldap', 'rdn')
                     l.passwd_s(
-                        'uid={uid},{basedn}'.format(
-                            uid=result_data[0][1]['uid'][0],
+                        '{rdn}={rdn_value},{basedn}'.format(
+                            rdn=rdn,
+                            rdn_value=result_data[0][1][rdn][0],
                             basedn=conf.get('ldap', 'basedn')),
                         None,
                         '{passwd}'.format(passwd=form.passwd.data))
@@ -252,4 +263,5 @@ if __name__ == '__main__':
     db_conn.close()
 
     app.run(host=conf.get('app', 'listen_addr'),
-            port=conf.getint('app', 'listen_port'), debug=True)
+            port=conf.getint('app', 'listen_port'),
+            debug=conf.getboolean('app', 'debug'))
