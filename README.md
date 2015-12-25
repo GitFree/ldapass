@@ -1,7 +1,7 @@
 
 ldapass
 =======
-## This is forked from bartekrutkowski/ldapass, and more config filed.
+## This is forked from bartekrutkowski/ldapass, add more config filed.
 
 **Web application for setting/changing LDAP user passwords.**
 
