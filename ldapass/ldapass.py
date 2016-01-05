@@ -218,8 +218,8 @@ def reset(link_id):
                     return render_template(
                         'reset.html',
                         error=error,
-                        form=form
-                    )
+                        form=form,
+                        link_id=link_id)
                 flash('Password for account {mail} has been changed.'.format(
                     mail=db_data[0][1]))
                 db_curs.execute(
@@ -230,7 +230,11 @@ def reset(link_id):
                 return redirect(url_for('index'))
             else:
                 error = 'The form is invalid, please try again.'
-                return render_template('reset.html', error=error, form=form)
+                return render_template(
+                    'reset.html',
+                    error=error,
+                    form=form,
+                    link_id=link_id)
     else:
         db_conn.close()
         error = 'There is no such password reset id {link_id}'.format(
