@@ -137,7 +137,11 @@ def index():
                     port=conf.get('app', 'listen_port'),
                     link_id=link_id
                 )
-                send_mail(form.mail.data, reset_url)
+                try:
+                    send_mail(form.mail.data, reset_url)
+                except Exception:
+                    error = 'Sending mail to {mail} failed. Please check if you input the right\
+                        email address.'.format(mail=form.mail.data)
             elif len(result_data) > 1:
                 error = 'More than one user found with email address of \
                     {mail}. Plese, get in touch with LDAP administration \
