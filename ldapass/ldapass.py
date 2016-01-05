@@ -193,7 +193,7 @@ def reset(link_id):
                     if conf.getboolean('ldap', 'starttls'):
                         l.start_tls_s()
                 except ldap.LDAPError as error:
-                    return render_template('error.html', error=error)
+                    return render_template('notice.html', error=error)
                 try:
                     search_filter = 'mail={mail}'.format(mail=db_data[0][1])
                     ldap_result_id = l.search(
@@ -227,7 +227,8 @@ def reset(link_id):
                         link_id=link_id))
                 db_conn.commit()
                 db_conn.close()
-                return redirect(url_for('index'))
+                # return redirect(url_for('index'))
+                return render_template('notice.html')
             else:
                 error = 'The form is invalid, please try again.'
                 return render_template(
@@ -239,7 +240,7 @@ def reset(link_id):
         db_conn.close()
         error = 'There is no such password reset id {link_id}'.format(
             link_id=link_id)
-        return render_template('error.html', error=error)
+        return render_template('notice.html', error=error)
 
 
 if __name__ == '__main__':
