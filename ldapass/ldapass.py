@@ -109,10 +109,10 @@ def index():
                     db_curs.execute(
                         "INSERT INTO mails (mail, link_id, created) VALUES \
                         ('{mail}', '{link_id}', '{created}')".format(
-                        mail=form.mail.data,
-                        link_id=link_id,
-                        created=datetime.datetime.now()
-                    ))
+                            mail=form.mail.data,
+                            link_id=link_id,
+                            created=datetime.datetime.now()
+                        ))
                     flash('Email containing password reset url has been sent \
                         to {mail}'.format(mail=form.mail.data))
                 else:
@@ -122,10 +122,10 @@ def index():
                     db_curs.execute(
                         "REPLACE INTO mails (mail, link_id, created) VALUES \
                         ('{mail}', '{link_id}', '{created}')".format(
-                        mail=form.mail.data,
-                        link_id=link_id,
-                        created=datetime.datetime.now()
-                    ))
+                            mail=form.mail.data,
+                            link_id=link_id,
+                            created=datetime.datetime.now()
+                        ))
                     flash('Email containing password reset url has been sent \
                         to {mail}. Previous reset urls have been \
                         invalidated.'.format(mail=form.mail.data))
@@ -138,6 +138,9 @@ def index():
                     link_id=link_id
                 )
                 try:
+                    print 'Sending to {mail} reset url {url}'.format(
+                        mail=form.mail.data,
+                        url=reset_url)
                     send_mail(form.mail.data, reset_url)
                 except Exception:
                     error = 'Sending mail to {mail} failed. Please check if you input the right\
