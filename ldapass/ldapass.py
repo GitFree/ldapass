@@ -12,11 +12,12 @@ from flask import Flask, flash, request, render_template, redirect, url_for
 import ldap
 from wtforms import Form, TextField, PasswordField, validators
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask('__name__')
 app.secret_key = os.urandom(128)
 conf = RawConfigParser()
-conf.read(os.environ['LDAPASS_CONFIG'])
+conf.read(os.path.join(BASE_DIR, 'ldapass.conf'))
 
 
 class EmailForm(Form):
